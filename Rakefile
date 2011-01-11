@@ -58,7 +58,7 @@ task :compile, :target do |t, args|
     -define=SUITE::NAME,"'#{target.name}'" \
     -define=SUITE::REPO,"'#{target.repo}'" \
     -debug=true \
-    -source-path+=src,#{target.src} \
+    -source-path+=src,libs/src,#{target.src} \
     -output=#{target.swf} \
     src/SwiftSuspendersPerformanceTestRunner.as`
     # delete the cache file if it was created
@@ -70,7 +70,10 @@ task :compile, :target do |t, args|
     # wait for the test runner's response
     socket = server.accept
     # profit?
-    puts 'RESULTS:'
-    puts socket.gets
+    File.open "#{target.src}.xml", 'w' do |f|
+      until socket.eof?
+        f << socket.gets
+      end
+    end
   end
 end

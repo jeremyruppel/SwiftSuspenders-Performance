@@ -10,6 +10,9 @@ package
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.net.XMLSocket;
+	import com.gskinner.performance.PerformanceTest;
+	import com.gskinner.performance.XMLLog;
+	import org.swiftsuspenders.performance.InstantiateTestSuite;
 
 	/**
 	 * Application entry point for SwiftSuspendersPerformanceTestRunner.
@@ -22,7 +25,10 @@ package
 	 */
 	public class SwiftSuspendersPerformanceTestRunner extends Sprite
 	{
-	
+		//--------------------------------------
+		//  CONSTRUCTOR
+		//--------------------------------------
+		
 		/**
 		 * @constructor
 		 */
@@ -31,13 +37,64 @@ package
 			super( );
 			
 			trace( "SwiftSuspendersPerformanceTestRunner::initialize()" );
-			trace( SUITE::NAME );
-			trace( SUITE::REPO );
-			
-			socket.addEventListener( Event.CONNECT, onSocketConnected );
 
-			socket.connect( 'localhost', 8989 );
+			log;
+			//log.out = trace;
+			
+			runner.addEventListener( Event.CLOSE, onTestsCompleted );
+			
+			runner.queueTestSuite( new InstantiateTestSuite( ) );
 		}
+		
+		//--------------------------------------
+		//  GETTER / SETTERS
+		//--------------------------------------
+		
+		/**
+		 * @private
+		 */
+		public function get suite( ) : String
+		{
+			return "TODO SUITE";
+			/*return SUITE::NAME;*/
+		}
+		
+		/**
+		 * @private
+		 */
+		public function get repo( ) : String
+		{
+			return "TODO REPO";
+			/*return SUITE::REPO;*/
+		}
+		
+		/**
+		 * @private
+		 */
+		public function get socket( ) : XMLSocket
+		{
+			return _socket || ( _socket = new XMLSocket( ) );
+		}
+		
+		/**
+		 * @private
+		 */
+		public function get runner( ) : PerformanceTest
+		{
+			return PerformanceTest.getInstance( );
+		}
+		
+		/**
+		 * @private
+		 */
+		public function get log( ) : XMLLog
+		{
+			return _log || ( _log = new XMLLog( runner, suite ) );
+		}
+		
+		//--------------------------------------
+		//  PRIVATE VARIABLES
+		//--------------------------------------
 	
 		/**
 		 * @private
@@ -47,9 +104,21 @@ package
 		/**
 		 * @private
 		 */
-		public function get socket( ) : XMLSocket
+		private var _log : XMLLog;
+		
+		//--------------------------------------
+		//  EVENT HANDLERS
+		//--------------------------------------
+		
+		/**
+		 * @param event Event
+		 * @private
+		 */
+		private function onTestsCompleted( event : Event ) : void
 		{
-			return _socket || ( _socket = new XMLSocket( ) );
+			socket.addEventListener( Event.CONNECT, onSocketConnected );
+
+			socket.connect( 'localhost', 8989 );
 		}
 	
 		/**
@@ -58,7 +127,10 @@ package
 		 */
 		private function onSocketConnected( event : Event ) : void
 		{
-			socket.send( <holy_crap/> );
+			trace( 'sending:' );
+			trace( log.xml.toXMLString( ) );
+			
+			socket.send( log.xml.toXMLString( ) );
 		
 			socket.close( );
 		}
